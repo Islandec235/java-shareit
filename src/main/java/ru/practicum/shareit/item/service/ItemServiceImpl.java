@@ -13,12 +13,12 @@ public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
 
     @Override
-    public Item createItem(Item item) {
+    public Item create(Item item) {
         return itemStorage.createItem(item);
     }
 
     @Override
-    public Item updateItem(Long itemId, Item item) {
+    public Item update(Long itemId, Item item) {
         return itemStorage.updateItem(itemId, item);
     }
 

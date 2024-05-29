@@ -35,7 +35,7 @@ public class UserController {
     @PostMapping
     public UserDto createUser(@Valid @RequestBody UserDto userDto) {
         User user = userMapper.toUser(userDto);
-        return userMapper.toUserDto(userService.createUser(user));
+        return userMapper.toUserDto(userService.create(user));
     }
 
     @PatchMapping("/{id}")
@@ -43,12 +43,12 @@ public class UserController {
                               @RequestBody UserDto userDto) {
         User user = userMapper.toUser(userDto);
         user.setId(id);
-        return userMapper.toUserDto(userService.updateUser(id, user));
+        return userMapper.toUserDto(userService.update(id, user));
     }
 
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userService.delete(id);
     }
 
     @GetMapping("/{id}")

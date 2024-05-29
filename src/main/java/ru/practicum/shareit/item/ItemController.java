@@ -32,7 +32,7 @@ public class ItemController {
     public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                               @Valid @RequestBody ItemDto itemDto) {
         Item item = itemMapper.toItem(itemDto, ownerId);
-        return itemMapper.toItemDto(itemService.createItem(item));
+        return itemMapper.toItemDto(itemService.create(item));
     }
 
     @PatchMapping("/{itemId}")
@@ -40,12 +40,11 @@ public class ItemController {
                               @PathVariable Long itemId,
                               @RequestBody ItemDto itemDto) {
         Item item = itemMapper.toItem(itemDto, ownerId);
-        return itemMapper.toItemDto(itemService.updateItem(itemId, item));
+        return itemMapper.toItemDto(itemService.update(itemId, item));
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") Long ownerId,
-                               @PathVariable Long itemId) {
+    public ItemDto getItemById(@PathVariable Long itemId) {
         return itemMapper.toItemDto(itemService.getItemById(itemId));
     }
 
@@ -55,8 +54,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long ownerId,
-                                      @RequestParam String text) {
+    public Collection<ItemDto> search(@RequestParam String text) {
         return itemMapper.collectionToItemDto(itemService.search(text));
     }
 }
