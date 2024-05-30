@@ -23,9 +23,8 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public Item createItem(Item item) {
         if (item.getAvailable() == null) {
-            ValidationException e = new ValidationException("Поле аренды не может быть пустым");
-            log.error(String.valueOf(item), e);
-            throw e;
+            log.error(String.valueOf(item));
+            throw new ValidationException("Поле аренды не может быть пустым");
         }
         userStorage.getUserById(item.getOwnerId());
         item.setId(id);
@@ -38,9 +37,8 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public Item updateItem(Long itemId, Item item) {
         if (!items.containsKey(itemId) || !item.getOwnerId().equals(items.get(itemId).getOwnerId())) {
-            ItemNotFoundException e = new ItemNotFoundException("Предмет не найден");
-            log.error(String.valueOf(itemId), e);
-            throw e;
+            log.error(String.valueOf(itemId));
+            throw new ItemNotFoundException("Предмет не найден");
         } else {
             Item itemInStorage = items.get(itemId);
             if (item.getAvailable() != null && item.getDescription() != null && item.getName() != null) {
@@ -57,9 +55,8 @@ public class InMemoryItemStorage implements ItemStorage {
                 itemInStorage.setDescription(item.getDescription());
                 return items.get(itemId);
             } else {
-                ItemNotFoundException e = new ItemNotFoundException("Предмет не найден");
-                log.error(String.valueOf(item), e);
-                throw e;
+                log.error(String.valueOf(item));
+                throw new ItemNotFoundException("Предмет не найден");
             }
         }
     }
@@ -67,9 +64,8 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public Item getItemById(Long itemId) {
         if (!items.containsKey(itemId)) {
-            ItemNotFoundException e = new ItemNotFoundException("Предмет не найден");
-            log.error(String.valueOf(itemId), e);
-            throw e;
+            log.error(String.valueOf(itemId));
+            throw new ItemNotFoundException("Предмет не найден");
         } else {
             log.info("Запрос на получение предмета по id");
             return items.get(itemId);

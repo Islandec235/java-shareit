@@ -27,10 +27,8 @@ public class InMemoryUserStorage implements UserStorage {
         for (User userInStorage : users.values()) {
             String email = user.getEmail();
             if (userInStorage.getEmail().equals(email)) {
-                String message = String.format("Пользователь с Email = {}, уже существует", email);
-                UserConflictException e = new UserConflictException(message);
-                log.error(String.valueOf(user), e);
-                throw e;
+                log.error(String.valueOf(user));
+                throw new UserConflictException("Пользователь уже существует");
             }
         }
 
@@ -44,19 +42,16 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(Long id, User user) {
         if (!users.containsKey(id)) {
-            UserNotFoundException e = new UserNotFoundException("Пользователь не найден");
-            log.error(String.valueOf(id), e);
-            throw e;
+            log.error(String.valueOf(id));
+            throw new UserNotFoundException("Пользователь не найден");
         }
 
         User userInStorage = users.get(id);
 
         for (User otherUser : users.values()) {
             if (otherUser != userInStorage && otherUser.getEmail().equals(user.getEmail())) {
-                String message = String.format("Email пользователя совпадает с id = {}", otherUser.getId());
-                UserConflictException e = new UserConflictException(message);
-                log.error(String.valueOf(user), e);
-                throw e;
+                log.error(String.valueOf(user));
+                throw new UserConflictException("Email пользователя совпадает с id");
             }
         }
 
@@ -71,18 +66,16 @@ public class InMemoryUserStorage implements UserStorage {
             userInStorage.setName(user.getName());
             return users.get(id);
         } else {
-            UserNotFoundException e = new UserNotFoundException("Пользователь не найден");
-            log.error(String.valueOf(user), e);
-            throw e;
+            log.error(String.valueOf(user));
+            throw new UserNotFoundException("Пользователь не найден");
         }
     }
 
     @Override
     public void deleteUser(Long id) {
         if (!users.containsKey(id)) {
-            UserNotFoundException e = new UserNotFoundException("Пользователь не найден");
-            log.error(String.valueOf(id), e);
-            throw e;
+            log.error(String.valueOf(id));
+            throw new UserNotFoundException("Пользователь не найден");
         } else {
             log.info("Запрос на удаление пользователя");
             users.remove(id);
@@ -92,9 +85,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUserById(Long id) {
         if (!users.containsKey(id)) {
-            UserNotFoundException e = new UserNotFoundException("Пользователь не найден");
-            log.error(String.valueOf(id), e);
-            throw e;
+            log.error(String.valueOf(id));
+            throw new UserNotFoundException("Пользователь не найден");
         } else {
             log.info("Запрос на получение пользователя по id");
             return users.get(id);
