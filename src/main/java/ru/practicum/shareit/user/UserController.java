@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
@@ -25,25 +23,22 @@ import java.util.Collection;
 @RequestMapping(path = "/users")
 public class UserController {
     private final UserService userService;
-    private final UserMapper userMapper;
 
     @GetMapping
     public Collection<UserDto> getAllUsers() {
-        return userMapper.collectionToUserDto(userService.getAllUsers());
+        return userService.getAllUsers();
     }
 
     @PostMapping
     public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-        User user = userMapper.toUser(userDto);
-        return userMapper.toUserDto(userService.create(user));
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{id}")
     public UserDto updateUser(@PathVariable Long id,
                               @RequestBody UserDto userDto) {
-        User user = userMapper.toUser(userDto);
-        user.setId(id);
-        return userMapper.toUserDto(userService.update(id, user));
+        userDto.setId(id);
+        return userService.update(userDto);
     }
 
     @DeleteMapping("/{id}")
@@ -53,6 +48,6 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserDto getUserById(@PathVariable Long id) {
-        return userMapper.toUserDto(userService.getUserById(id));
+        return userService.getUserById(id);
     }
 }

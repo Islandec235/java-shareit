@@ -16,9 +16,9 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class InMemoryItemStorage implements ItemStorage {
-    private long id = 1L;
     private final HashMap<Long, Item> items = new HashMap<>();
     private final UserStorage userStorage;
+    private long id = 1L;
 
     @Override
     public Item createItem(Item item) {
@@ -26,7 +26,7 @@ public class InMemoryItemStorage implements ItemStorage {
             log.error(String.valueOf(item));
             throw new ValidationException("Поле аренды не может быть пустым");
         }
-        userStorage.getUserById(item.getOwnerId());
+        userStorage.getUserById(item.getOwner().getId());
         item.setId(id);
         items.put(item.getId(), item);
         log.info("Запрос на создание предмета");
@@ -36,7 +36,7 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Item updateItem(Long itemId, Item item) {
-        if (!items.containsKey(itemId) || !item.getOwnerId().equals(items.get(itemId).getOwnerId())) {
+        if (!items.containsKey(itemId) || !item.getOwner().getId().equals(items.get(itemId).getOwner().getId())) {
             log.error(String.valueOf(itemId));
             throw new ItemNotFoundException("Предмет не найден");
         } else {
@@ -77,7 +77,7 @@ public class InMemoryItemStorage implements ItemStorage {
         List<Item> itemsByOwner = new ArrayList<>();
 
         for (Item item : items.values()) {
-            if (item.getOwnerId().equals(ownerId)) {
+            if (item.getOwner().getId().equals(ownerId)) {
                 itemsByOwner.add(item);
             }
         }

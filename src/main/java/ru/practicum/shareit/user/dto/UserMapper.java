@@ -24,7 +24,7 @@ public class UserMapper {
         );
     }
 
-    public List<UserDto> collectionToUserDto(List<User> users) {
+    public List<UserDto> listUserDto(List<User> users) {
         List<UserDto> usersDto = new ArrayList<>();
 
         for (User user : users) {
@@ -34,7 +34,7 @@ public class UserMapper {
         return usersDto;
     }
 
-    public List<User> collectionToUser(List<UserDto> usersDto) {
+    public List<User> listUser(List<UserDto> usersDto) {
         List<User> users = new ArrayList<>();
 
         for (UserDto userDto : usersDto) {

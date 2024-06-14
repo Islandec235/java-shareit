@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemCommentAndBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -25,36 +25,41 @@ import java.util.Collection;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
-    private final ItemMapper itemMapper;
     private final ItemService itemService;
 
     @PostMapping
     public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                               @Valid @RequestBody ItemDto itemDto) {
-        Item item = itemMapper.toItem(itemDto, ownerId);
-        return itemMapper.toItemDto(itemService.create(item));
+        return itemService.create(itemDto, ownerId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                               @PathVariable Long itemId,
                               @RequestBody ItemDto itemDto) {
-        Item item = itemMapper.toItem(itemDto, ownerId);
-        return itemMapper.toItemDto(itemService.update(itemId, item));
+        itemDto.setId(itemId);
+        return itemService.update(itemDto, ownerId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Long itemId) {
-        return itemMapper.toItemDto(itemService.getItemById(itemId));
+    public ItemCommentAndBookingDto getItemById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                @PathVariable Long itemId) {
+        return itemService.getItemById(userId, itemId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        return itemMapper.collectionToItemDto(itemService.getItemsByOwner(ownerId));
+    public Collection<ItemCommentAndBookingDto> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
+        return itemService.getItemsByOwner(ownerId);
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> search(@RequestParam String text) {
-        return itemMapper.collectionToItemDto(itemService.search(text));
+        return itemService.search(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                    @PathVariable Long itemId, @Valid @RequestBody CommentDto commentDto) {
+        return itemService.createComment(userId, itemId, commentDto);
     }
 }
