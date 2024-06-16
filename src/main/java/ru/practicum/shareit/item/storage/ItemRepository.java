@@ -8,13 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    List<Item> findAll();
-
-    Item save(Item user);
-
     void deleteById(Long id);
-
-    Optional<Item> findById(Long id);
 
     @Query("SELECT i.id FROM Item i WHERE i.owner.id = ?1 ")
     List<Long> findItemIdByOwner(Long ownerId);

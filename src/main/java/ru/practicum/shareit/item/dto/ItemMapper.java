@@ -1,14 +1,16 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.model.Item;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class ItemMapper {
-    public ItemDto toItemDto(Item item) {
+    public ItemDto toItemDto(@Valid Item item) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
@@ -18,7 +20,7 @@ public class ItemMapper {
         );
     }
 
-    public Item toItem(ItemDto itemDto) {
+    public Item toItem(@Valid ItemDto itemDto) {
         return new Item(
                 itemDto.getId(),
                 itemDto.getName(),
@@ -28,7 +30,7 @@ public class ItemMapper {
         );
     }
 
-    public ItemCommentAndBookingDto toItemWithCommentDto(Item item) {
+    public ItemCommentAndBookingDto toItemWithCommentDto(@NonNull Item item) {
         return new ItemCommentAndBookingDto(
                 item.getId(),
                 item.getName(),
@@ -38,7 +40,7 @@ public class ItemMapper {
         );
     }
 
-    public List<ItemDto> listItemDto(List<Item> items) {
+    public List<ItemDto> listItemDto(@NonNull List<Item> items) {
         List<ItemDto> itemsDto = new ArrayList<>();
 
         for (Item item : items) {
@@ -48,7 +50,7 @@ public class ItemMapper {
         return itemsDto;
     }
 
-    public List<ItemCommentAndBookingDto> listItemCommentAndBookingDto(List<Item> items) {
+    public List<ItemCommentAndBookingDto> listItemCommentAndBookingDto(@NonNull List<Item> items) {
         List<ItemCommentAndBookingDto> itemsDto = new ArrayList<>();
 
         for (Item item : items) {
@@ -58,7 +60,7 @@ public class ItemMapper {
         return itemsDto;
     }
 
-    public List<Item> listItem(List<ItemDto> itemsDto, Long ownerId) {
+    public List<Item> listItem(@NonNull List<ItemDto> itemsDto, @NonNull Long ownerId) {
         List<Item> items = new ArrayList<>();
 
         for (ItemDto itemDto : itemsDto) {

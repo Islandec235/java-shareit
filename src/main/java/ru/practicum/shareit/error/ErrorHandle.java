@@ -6,10 +6,10 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.booking.exceptions.BookingNotFoundException;
-import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
-import ru.practicum.shareit.user.exceptions.UserConflictException;
-import ru.practicum.shareit.user.exceptions.UserNotFoundException;
+import ru.practicum.shareit.booking.exception.BookingNotFoundException;
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.user.exception.UserConflictException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 import javax.validation.ValidationException;
 import java.io.IOException;
