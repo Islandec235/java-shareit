@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.dto;
 
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.model.User;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 @Component
 public class UserMapper {
-    public UserDto toUserDto(User user) {
+    public UserDto toUserDto(@NonNull User user) {
         return new UserDto(
                 user.getId(),
                 user.getName(),
@@ -16,7 +17,7 @@ public class UserMapper {
         );
     }
 
-    public User toUser(UserDto userDto) {
+    public User toUser(@NonNull UserDto userDto) {
         return new User(
                 userDto.getId(),
                 userDto.getName(),
@@ -24,7 +25,7 @@ public class UserMapper {
         );
     }
 
-    public List<UserDto> collectionToUserDto(List<User> users) {
+    public List<UserDto> listUserDto(@NonNull List<User> users) {
         List<UserDto> usersDto = new ArrayList<>();
 
         for (User user : users) {
@@ -34,7 +35,7 @@ public class UserMapper {
         return usersDto;
     }
 
-    public List<User> collectionToUser(List<UserDto> usersDto) {
+    public List<User> listUser(@NonNull List<UserDto> usersDto) {
         List<User> users = new ArrayList<>();
 
         for (UserDto userDto : usersDto) {
