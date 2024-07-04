@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -18,6 +19,9 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.exception.RequestNotFoundException;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.exception.UserConflictException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
@@ -41,11 +45,13 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     @Transactional
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         Item item = itemMapper.toItem(itemDto);
+
         if (item.getAvailable() == null) {
             log.error(String.valueOf(item));
             throw new ValidationException("Поле аренды не может быть пустым");
@@ -59,7 +65,25 @@ public class ItemServiceImpl implements ItemService {
         }
 
         item.setOwner(owner.get());
-        return itemMapper.toItemDto(itemRepository.save(item));
+        ItemDto newItemDto = itemMapper.toItemDto(itemRepository.save(item));
+        Long requestId = itemDto.getRequestId();
+
+        if (requestId != null) {
+            Optional<ItemRequest> requestOptional = itemRequestRepository.findById(requestId);
+
+            if (requestOptional.isEmpty()) {
+                log.error("Запрос с id = {} не найден", requestId);
+                throw new RequestNotFoundException("Не найден запрос с id = " + requestId);
+            }
+
+            ItemRequest request = requestOptional.get();
+            List<Item> items = request.getItems();
+            items.add(item);
+            itemRequestRepository.save(request);
+            newItemDto.setRequestId(requestId);
+        }
+
+        return newItemDto;
     }
 
     @Override
@@ -159,8 +183,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemCommentAndBookingDto> getItemsByOwner(Long ownerId) {
-        List<Long> itemsId = itemRepository.findItemIdByOwner(ownerId);
+    public List<ItemCommentAndBookingDto> getItemsByOwner(Long ownerId, Integer from, Integer size) {
+        List<Long> itemsId = itemRepository.findItemIdByOwner(ownerId, PageRequest.of(from / size, size));
         List<ItemCommentAndBookingDto> itemsDto = new ArrayList<>();
 
         for (Long id : itemsId) {
@@ -172,7 +196,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
@@ -180,7 +204,8 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.listItemDto(
                 itemRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableTrue(
                         text,
-                        text
+                        text,
+                        PageRequest.of(from / size, size)
                 )
         );
     }

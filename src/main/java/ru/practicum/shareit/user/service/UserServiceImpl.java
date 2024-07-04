@@ -56,12 +56,9 @@ public class UserServiceImpl implements UserService {
         } else if (userDto.getEmail() == null) {
             userDto.setEmail(userInStorage.getEmail());
             return mapper.toUserDto(repository.save(mapper.toUser(userDto)));
-        } else if (userDto.getName() == null) {
+        } else {
             userDto.setName(userInStorage.getName());
             return mapper.toUserDto(repository.save(mapper.toUser(userDto)));
-        } else {
-            log.error(String.valueOf(userDto));
-            throw new UserNotFoundException("Пользователь не найден");
         }
     }
 

@@ -4,23 +4,23 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.model.Item;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class ItemMapper {
-    public ItemDto toItemDto(@Valid Item item) {
+    public ItemDto toItemDto(@NonNull Item item) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getRentals(),
-                item.getAvailable()
+                item.getAvailable(),
+                item.getRequestId()
         );
     }
 
-    public Item toItem(@Valid ItemDto itemDto) {
+    public Item toItem(@NonNull ItemDto itemDto) {
         return new Item(
                 itemDto.getId(),
                 itemDto.getName(),
@@ -48,25 +48,5 @@ public class ItemMapper {
         }
 
         return itemsDto;
-    }
-
-    public List<ItemCommentAndBookingDto> listItemCommentAndBookingDto(@NonNull List<Item> items) {
-        List<ItemCommentAndBookingDto> itemsDto = new ArrayList<>();
-
-        for (Item item : items) {
-            itemsDto.add(toItemWithCommentDto(item));
-        }
-
-        return itemsDto;
-    }
-
-    public List<Item> listItem(@NonNull List<ItemDto> itemsDto, @NonNull Long ownerId) {
-        List<Item> items = new ArrayList<>();
-
-        for (ItemDto itemDto : itemsDto) {
-            items.add(toItem(itemDto));
-        }
-
-        return items;
     }
 }

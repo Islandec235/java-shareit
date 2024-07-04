@@ -13,5 +13,5 @@ public class CommentDto {
     @NotBlank
     private String text;
     private String authorName;
-    private final Instant created = Instant.now();
+    private Instant created;
 }

@@ -2,6 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
@@ -41,7 +44,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingOutputDto create(BookingInputDto bookingInputDto, Long userId) {
-        Optional<User> booker = userRepository.findById(userId);
+        User booker = userValidation(userId);
 
         if (bookingInputDto.getStart().isAfter(bookingInputDto.getEnd())
                 || bookingInputDto.getStart().isEqual(bookingInputDto.getEnd())) {
@@ -49,13 +52,8 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Некорректная дата");
         }
 
-        if (booker.isEmpty()) {
-            log.error("Пользователь с id = {} не найден", userId);
-            throw new UserNotFoundException("Не найден пользователь с id = " + userId);
-        }
-
         Booking booking = bookingMapper.toBooking(bookingInputDto);
-        booking.setBooker(booker.get());
+        booking.setBooker(booker);
         Optional<Item> item = itemRepository.findById(bookingInputDto.getItemId());
 
         if (item.isEmpty()) {
@@ -76,7 +74,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setItem(item.get());
         booking.setStatus(BookingStatus.WAITING);
         BookingOutputDto bookingOutputDto = bookingMapper.toBookingOutputDto(bookingRepository.saveAndFlush(booking));
-        bookingOutputDto.setBooker(userMapper.toUserDto(booker.get()));
+        bookingOutputDto.setBooker(userMapper.toUserDto(booker));
         bookingOutputDto.setItem(itemMapper.toItemDto(item.get()));
         return bookingOutputDto;
     }
@@ -86,12 +84,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingOutputDto confirmBooking(Long ownerId, Long bookingId, Boolean approved) {
         Optional<Booking> bookingOptional =
                 bookingRepository.findById(bookingId);
-        Optional<User> userInStorage = userRepository.findById(ownerId);
-
-        if (userInStorage.isEmpty()) {
-            log.error("Пользователь не найден id = {}", ownerId);
-            throw new UserNotFoundException("Не найден пользователь с id = " + ownerId);
-        }
+        userValidation(ownerId);
 
         if (bookingOptional.isEmpty()) {
             log.error("Заказ с id = {} ownerId = {} не найден", bookingId, ownerId);
@@ -100,7 +93,7 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = bookingOptional.get();
 
-        if (!booking.getItem().getOwner().getId().equals(userInStorage.get().getId())) {
+        if (!booking.getItem().getOwner().getId().equals(ownerId)) {
             log.error("Пользователь с id = {} не является владельцем предмета", ownerId);
             throw new UserNotFoundException("Не найден пользователь с id = " + ownerId);
         }
@@ -132,13 +125,12 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingNotFoundException("Не найден заказ с id = " + bookingId);
         }
 
-        Optional<User> user = userRepository.findById(userId);
+        User user = userValidation(userId);
         User booker = booking.get().getBooker();
         User owner = booking.get().getItem().getOwner();
 
-        if (user.isEmpty() ||
-                (!user.get().getId().equals(booker.getId())
-                        && !user.get().getId().equals(owner.getId()))) {
+        if (!user.getId().equals(booker.getId())
+                && !user.getId().equals(owner.getId())) {
             log.error("Пользователь с id = {} не владелец и не заказчик", userId);
             throw new UserNotFoundException("Не найден пользователь с id = " + userId);
         }
@@ -151,42 +143,47 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingOutputDto> getBookingsByUser(Long userId, String stateString) {
+    public List<BookingOutputDto> getBookingsByUser(Long userId, String stateString, Integer from, Integer size) {
         try {
             BookingState state = BookingState.valueOf(stateString);
-            if (userRepository.findById(userId).isEmpty()) {
-                log.error("Пользователь не найден id = {}", userId);
-                throw new UserNotFoundException("Не найден пользователь с id = " + userId);
-            }
+            userValidation(userId);
 
             List<Booking> bookings;
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
 
             switch (state) {
                 case ALL:
-                    bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
+                    bookings = bookingRepository.findAllByBookerId(userId, pageable);
                     break;
                 case PAST:
-                    bookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(
+                    bookings = bookingRepository.findAllByBookerIdAndEndBefore(
                             userId,
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            pageable);
                     break;
                 case FUTURE:
-                    bookings = bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(
+                    bookings = bookingRepository.findAllByBookerIdAndStartAfter(
                             userId,
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            pageable);
                     break;
                 case WAITING:
-                    bookings = bookingRepository.findAllByBookerIdAndStatusIsOrderByStartDesc(
+                    bookings = bookingRepository.findAllByBookerIdAndStatusIs(
                             userId,
-                            BookingStatus.WAITING);
+                            BookingStatus.WAITING,
+                            pageable);
                     break;
                 case REJECTED:
-                    bookings = bookingRepository.findAllByBookerIdAndStatusIsOrderByStartDesc(
+                    bookings = bookingRepository.findAllByBookerIdAndStatusIs(
                             userId,
-                            BookingStatus.REJECTED);
+                            BookingStatus.REJECTED,
+                            pageable);
                     break;
                 case CURRENT:
-                    bookings = bookingRepository.findAllByBookerIdCurrentBooking(userId, LocalDateTime.now());
+                    bookings = bookingRepository.findAllByBookerIdCurrentBooking(
+                            userId,
+                            LocalDateTime.now(),
+                            pageable);
                     break;
                 default:
                     log.error("Некорректный параметр сортировки: {}", state);
@@ -216,42 +213,47 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingOutputDto> getBookingsByOwner(Long ownerId, String stateString) {
+    public List<BookingOutputDto> getBookingsByOwner(Long ownerId, String stateString, Integer from, Integer size) {
         try {
             BookingState state = BookingState.valueOf(stateString);
-            if (userRepository.findById(ownerId).isEmpty()) {
-                log.error("Пользователь не найден id = {}", ownerId);
-                throw new UserNotFoundException("Не найден пользователь с id = " + ownerId);
-            }
+            userValidation(ownerId);
 
             List<Booking> bookings;
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
 
             switch (state) {
                 case ALL:
-                    bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId);
+                    bookings = bookingRepository.findAllByItemOwnerId(ownerId, pageable);
                     break;
                 case PAST:
-                    bookings = bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(
+                    bookings = bookingRepository.findAllByItemOwnerIdAndEndBefore(
                             ownerId,
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            pageable);
                     break;
                 case FUTURE:
-                    bookings = bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(
+                    bookings = bookingRepository.findAllByItemOwnerIdAndStartAfter(
                             ownerId,
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            pageable);
                     break;
                 case WAITING:
-                    bookings = bookingRepository.findAllByItemOwnerIdAndStatusIsOrderByStartDesc(
+                    bookings = bookingRepository.findAllByItemOwnerIdAndStatusIs(
                             ownerId,
-                            BookingStatus.WAITING);
+                            BookingStatus.WAITING,
+                            pageable);
                     break;
                 case REJECTED:
-                    bookings = bookingRepository.findAllByItemOwnerIdAndStatusIsOrderByStartDesc(
+                    bookings = bookingRepository.findAllByItemOwnerIdAndStatusIs(
                             ownerId,
-                            BookingStatus.REJECTED);
+                            BookingStatus.REJECTED,
+                            pageable);
                     break;
                 case CURRENT:
-                    bookings = bookingRepository.findAllByItemOwnerIdCurrentBooking(ownerId, LocalDateTime.now());
+                    bookings = bookingRepository.findAllByItemOwnerIdCurrentBooking(
+                            ownerId,
+                            LocalDateTime.now(),
+                            pageable);
                     break;
                 default:
                     log.error("Некорректный параметр сортировки: {}", state);
@@ -277,5 +279,16 @@ public class BookingServiceImpl implements BookingService {
             log.error("Некорректное значение state = {}", stateString);
             throw new IllegalArgumentException("Unknown state: " + stateString);
         }
+    }
+
+    private User userValidation(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            log.error("Пользователь не найден id = {}", userId);
+            throw new UserNotFoundException("Не найден пользователь с id = " + userId);
+        }
+
+        return user.get();
     }
 }
