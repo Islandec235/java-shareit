@@ -59,7 +59,6 @@ public class BookingServiceIntegrationTest {
     @AfterEach
     void tearDown() {
         userRepository.deleteById(owner.getId());
-        userRepository.deleteById(booker.getId());
     }
 
     @Test

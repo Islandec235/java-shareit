@@ -146,7 +146,6 @@
 						<output>file</output>
 						<excludes>
 							<exclude>ru/practicum/shareit/**/model/</exclude>
-							<exclude>ru/practicum/shareit/booking/service/BookingServiceImpl.*</exclude>
 							<exclude>ru/practicum/shareit/ShareItApp.*</exclude>
 							<exclude>ru/practicum/shareit/**/dto/</exclude>
 							<exclude>ru/practicum/shareit/error/</exclude>
