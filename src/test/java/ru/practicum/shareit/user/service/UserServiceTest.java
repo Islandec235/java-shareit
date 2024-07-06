@@ -16,6 +16,7 @@ import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +44,15 @@ public class UserServiceTest {
     void setUp() {
         userDto = new UserDto(1L, "Danila", "email@mail.ru");
         user = new User(1L, "Danila", "email@mail.ru");
+    }
+
+    @Test
+    public void shouldGetAllUsers() {
+        when(mockRepository.findAll()).thenReturn(List.of(user));
+        when(mockMapper.listUserDto(List.of(user))).thenReturn(List.of(userDto));
+        List<UserDto> users = userService.getAllUsers();
+
+        assertEquals(users, List.of(userDto));
     }
 
     @Test
@@ -88,6 +98,20 @@ public class UserServiceTest {
         userDto.setName("Albert");
 
         assertEquals(updatedUserDto, userDto);
+    }
+
+    @Test
+    public void shouldReturnExceptionForUpdateWith() {
+        User userDb = new User(1L, "Albert", "test@mail.ru");
+        User userByEmail = new User(2L, "Gena", "email@mail.ru");
+        UserDto userDbDto = new UserDto(1L, "Albert", "test@mail.ru");
+        when(mockMapper.toUser(userDbDto)).thenReturn(userDb);
+        when(mockMapper.toUserDto(userDb)).thenReturn(userDbDto);
+        when(mockRepository.findById(1L)).thenReturn(Optional.of(userDb));
+        when(mockRepository.findByEmail(user.getEmail())).thenReturn(userByEmail);
+
+        assertThrows(UserConflictException.class,
+                () -> userService.update(userDto));
     }
 
     @Test

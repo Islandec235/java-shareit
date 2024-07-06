@@ -63,17 +63,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional(readOnly = true)
     public List<ItemRequestDto> getAllItemRequests(Long userId, Integer from, Integer size) {
         userValidation(userId);
-        List<ItemRequest> requests;
-
-        if (from == null || size == null) {
-            requests = itemRequestRepository.findByUserIdNotOrderByCreatedDesc(userId);
-        } else {
-            requests = itemRequestRepository.findAllByUserIdNot(
+        List<ItemRequest> requests = itemRequestRepository.findAllByUserIdNot(
                     userId,
-                    PageRequest.of(from / size, size, Sort.by("created").descending())
-            );
-        }
-
+                    PageRequest.of(from / size, size, Sort.by("created").descending()));
         List<ItemRequestDto> itemRequestDtoList = new ArrayList<>();
 
         for (ItemRequest request : requests) {

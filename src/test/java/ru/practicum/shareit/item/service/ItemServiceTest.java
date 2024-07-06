@@ -266,6 +266,24 @@ public class ItemServiceTest {
     }
 
     @Test
+    public void shouldReturnExceptionForUpdateWithoutItem() {
+        itemDto.setAvailable(null);
+        itemDto.setName(null);
+        itemDto.setDescription(null);
+        item.setAvailable(null);
+        item.setName(null);
+        item.setDescription(null);
+        Item itemInDb = new Item(1L, "Test", "test", 0, true);
+        itemInDb.setOwner(owner);
+
+        when(mockUserRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
+        when(mockItemRepository.findById(itemDto.getId())).thenReturn(Optional.of(itemInDb));
+
+        assertThrows(ItemNotFoundException.class,
+                () -> service.update(itemDto, owner.getId()));
+    }
+
+    @Test
     public void shouldReturnItemById() {
         ItemCommentAndBookingDto itemCommentDto =
                 new ItemCommentAndBookingDto(1L, "Notebook", "testDesc", 0, true);
@@ -287,6 +305,14 @@ public class ItemServiceTest {
         ItemCommentAndBookingDto itemById = service.getItemById(owner.getId(), item.getId());
 
         assertEquals(itemById, itemCommentDto);
+    }
+
+    @Test
+    public void shouldReturnExceptionForItemByIdWithoutItem() {
+        when(mockItemRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ItemNotFoundException.class,
+                () -> service.getItemById(1L, 1L));
     }
 
     @Test
@@ -395,7 +421,6 @@ public class ItemServiceTest {
     @Test
     public void shouldReturnValidExceptionForCreateCommentWithoutBooking() {
         CommentDto commentDto = new CommentDto(1L, "text", "Test", Instant.now());
-        Comment comment = new Comment(1L, "text", commentDto.getCreated());
 
         when(mockBookingRepository.findAllByItemIdAndBookerIdAndStatusIsAndEndBefore(
                 eq(item.getId()),

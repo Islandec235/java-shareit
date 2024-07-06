@@ -45,9 +45,9 @@ public class BookingMapperTest {
     public void shouldReturnBookingWithBookerIdDto() {
         booking.setStatus(BookingStatus.WAITING);
         booking.setBooker(new User(1L, "Test", "test@email.ru"));
-        BookingOutputDto toDto = mapper.toBookingOutputDto(booking);
+        BookingWithBookerIdDto toDto = mapper.toBookingWithBookerIdDto(booking);
         booking.setBooker(null);
 
-        assertEquals(toDto, outputDto);
+        assertEquals(toDto, new BookingWithBookerIdDto(1L, 1L));
     }
 }

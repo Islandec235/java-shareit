@@ -29,6 +29,7 @@ import ru.practicum.shareit.user.storage.UserRepository;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,12 +83,12 @@ public class BookingServiceTest {
         BookingInputDto inputBooking = new BookingInputDto(
                 1L,
                 1L,
-                LocalDateTime.of(2025, 7, 1, 5, 17, 42),
-                LocalDateTime.of(2026, 7, 1, 5, 17, 42));
+                LocalDateTime.of(2023, 7, 1, 5, 17, 42),
+                LocalDateTime.of(2024, 7, 1, 5, 17, 42));
         BookingOutputDto outputBooking = new BookingOutputDto(
                 1L,
-                LocalDateTime.of(2025, 7, 1, 5, 17, 42),
-                LocalDateTime.of(2026, 7, 1, 5, 17, 42),
+                LocalDateTime.of(2023, 7, 1, 5, 17, 42),
+                LocalDateTime.of(2024, 7, 1, 5, 17, 42),
                 BookingStatus.WAITING);
 
         when(mockUserRepository.findById(user.getId())).thenReturn(Optional.of(user));
@@ -106,7 +107,21 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void shouldReturnValidationExceptionForCreateBookingWithIncorrectDate() {
+    public void shouldReturnValidationExceptionForCreateBookingWithStartIsEqualsEnd() {
+        BookingInputDto inputBooking = new BookingInputDto(
+                1L,
+                1L,
+                LocalDateTime.of(2026, 7, 1, 5, 17, 42),
+                LocalDateTime.of(2026, 7, 1, 5, 17, 42));
+
+        when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
+
+        assertThrows(ValidationException.class,
+                () -> service.create(inputBooking, user.getId()));
+    }
+
+    @Test
+    public void shouldReturnValidationExceptionForCreateBookingWithStartIsAfterEnd() {
         BookingInputDto inputBooking = new BookingInputDto(
                 1L,
                 1L,
@@ -278,6 +293,26 @@ public class BookingServiceTest {
     }
 
     @Test
+    public void shouldReturnBookingByIdForOwner() {
+        booking.setItem(item);
+        booking.setBooker(user);
+        BookingOutputDto outputBooking = new BookingOutputDto(
+                1L, booking.getStart(), booking.getEnd(), BookingStatus.WAITING);
+        outputBooking.setBooker(userDto);
+        outputBooking.setItem(itemDto);
+
+        when(mockBookingRepository.findById(any())).thenReturn(Optional.of(booking));
+        when(mockUserRepository.findById(any())).thenReturn(Optional.of(owner));
+        when(mockBookingMapper.toBookingOutputDto(any())).thenReturn(outputBooking);
+        when(mockUserMapper.toUserDto(any())).thenReturn(userDto);
+        when(mockItemMapper.toItemDto(any())).thenReturn(itemDto);
+
+        BookingOutputDto foundBooking = service.getBookingById(owner.getId(), booking.getId());
+
+        assertEquals(foundBooking, outputBooking);
+    }
+
+    @Test
     public void shouldReturnNotFoundForGetByIdWithoutBooking() {
         when(mockBookingRepository.findById(any())).thenReturn(Optional.empty());
 
@@ -314,6 +349,112 @@ public class BookingServiceTest {
         List<BookingOutputDto> bookings = service.getBookingsByUser(user.getId(), "ALL", 0, 20);
 
         assertEquals(List.of(outputBooking), bookings);
+    }
+
+    @Test
+    public void shouldGetBookingsByUserWithStatePAST() {
+        BookingOutputDto outputBooking = new BookingOutputDto(
+                1L, booking.getStart(), booking.getEnd(), BookingStatus.WAITING);
+        outputBooking.setBooker(userDto);
+        outputBooking.setItem(itemDto);
+
+        when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
+        when(mockBookingRepository.findAllByBookerIdAndEndBefore(any(), any(), any())).thenReturn(List.of(booking));
+        when(mockBookingMapper.toBookingOutputDto(any())).thenReturn(outputBooking);
+        when(mockUserMapper.toUserDto(any())).thenReturn(userDto);
+        when(mockItemMapper.toItemDto(any())).thenReturn(itemDto);
+
+        List<BookingOutputDto> bookings = service.getBookingsByUser(user.getId(), "PAST", 0, 20);
+
+        assertEquals(List.of(outputBooking), bookings);
+    }
+
+    @Test
+    public void shouldGetBookingsByUserWithStateFUTURE() {
+        booking.setStart(LocalDateTime.of(2100, 7, 1, 5, 17, 42));
+        booking.setEnd(LocalDateTime.of(2101, 7, 1, 5, 17, 42));
+        BookingOutputDto outputBooking = new BookingOutputDto(
+                1L, booking.getStart(), booking.getEnd(), BookingStatus.WAITING);
+        outputBooking.setBooker(userDto);
+        outputBooking.setItem(itemDto);
+
+        when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
+        when(mockBookingRepository.findAllByBookerIdAndStartAfter(any(), any(), any())).thenReturn(List.of(booking));
+        when(mockBookingMapper.toBookingOutputDto(any())).thenReturn(outputBooking);
+        when(mockUserMapper.toUserDto(any())).thenReturn(userDto);
+        when(mockItemMapper.toItemDto(any())).thenReturn(itemDto);
+
+        List<BookingOutputDto> bookings = service.getBookingsByUser(user.getId(), "FUTURE", 0, 20);
+
+        assertEquals(List.of(outputBooking), bookings);
+    }
+
+    @Test
+    public void shouldGetBookingsByUserWithStateWAITING() {
+        BookingOutputDto outputBooking = new BookingOutputDto(
+                1L, booking.getStart(), booking.getEnd(), BookingStatus.WAITING);
+        outputBooking.setBooker(userDto);
+        outputBooking.setItem(itemDto);
+
+        when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
+        when(mockBookingRepository.findAllByBookerIdAndStatusIs(any(), any(), any())).thenReturn(List.of(booking));
+        when(mockBookingMapper.toBookingOutputDto(any())).thenReturn(outputBooking);
+        when(mockUserMapper.toUserDto(any())).thenReturn(userDto);
+        when(mockItemMapper.toItemDto(any())).thenReturn(itemDto);
+
+        List<BookingOutputDto> bookings =
+                service.getBookingsByUser(user.getId(), "WAITING", 0, 20);
+
+        assertEquals(List.of(outputBooking), bookings);
+    }
+
+    @Test
+    public void shouldGetBookingsByUserWithStateREJECTED() {
+        BookingOutputDto outputBooking = new BookingOutputDto(
+                1L, booking.getStart(), booking.getEnd(), BookingStatus.REJECTED);
+        outputBooking.setBooker(userDto);
+        outputBooking.setItem(itemDto);
+
+        when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
+        when(mockBookingRepository.findAllByBookerIdAndStatusIs(any(), any(), any())).thenReturn(List.of(booking));
+        when(mockBookingMapper.toBookingOutputDto(any())).thenReturn(outputBooking);
+        when(mockUserMapper.toUserDto(any())).thenReturn(userDto);
+        when(mockItemMapper.toItemDto(any())).thenReturn(itemDto);
+
+        List<BookingOutputDto> bookings =
+                service.getBookingsByUser(user.getId(), "REJECTED", 0, 20);
+
+        assertEquals(List.of(outputBooking), bookings);
+    }
+
+    @Test
+    public void shouldGetBookingsByUserWithStateCURRENT() {
+        booking.setStart(LocalDateTime.of(2000, 7, 1, 5, 17, 42));
+        booking.setEnd(LocalDateTime.of(2100, 7, 1, 5, 17, 42));
+        BookingOutputDto outputBooking = new BookingOutputDto(
+                1L, booking.getStart(), booking.getEnd(), BookingStatus.WAITING);
+        outputBooking.setBooker(userDto);
+        outputBooking.setItem(itemDto);
+
+        when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
+        when(mockBookingRepository.findAllByBookerIdCurrentBooking(any(), any(), any())).thenReturn(List.of(booking));
+        when(mockBookingMapper.toBookingOutputDto(any())).thenReturn(outputBooking);
+        when(mockUserMapper.toUserDto(any())).thenReturn(userDto);
+        when(mockItemMapper.toItemDto(any())).thenReturn(itemDto);
+
+        List<BookingOutputDto> bookings =
+                service.getBookingsByUser(user.getId(), "CURRENT", 0, 20);
+
+        assertEquals(List.of(outputBooking), bookings);
+    }
+
+    @Test
+    public void shouldReturnExceptionForGetBookingByUserWithoutBookings() {
+        when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
+        when(mockBookingRepository.findAllByBookerId(any(), any())).thenReturn(Collections.emptyList());
+
+        assertThrows(BookingNotFoundException.class,
+                () -> service.getBookingsByUser(user.getId(), "ALL", 0, 20));
     }
 
     @Test

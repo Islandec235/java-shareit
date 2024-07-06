@@ -31,7 +31,6 @@ import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -151,7 +150,7 @@ public class ItemServiceImpl implements ItemService {
 
         ItemCommentAndBookingDto itemDto = itemMapper.toItemWithCommentDto(itemOptional.get());
 
-        if (Objects.equals(itemOptional.get().getOwner().getId(), userId)) {
+        if (itemOptional.get().getOwner().getId().equals(userId)) {
             Optional<Booking> lastBooking = bookingRepository.findByItemIdAndStatusIsAndStartBeforeOrderByStartDesc(
                     itemDto.getId(),
                     BookingStatus.APPROVED,

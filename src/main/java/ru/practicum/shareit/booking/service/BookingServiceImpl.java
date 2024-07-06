@@ -152,9 +152,6 @@ public class BookingServiceImpl implements BookingService {
             Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
 
             switch (state) {
-                case ALL:
-                    bookings = bookingRepository.findAllByBookerId(userId, pageable);
-                    break;
                 case PAST:
                     bookings = bookingRepository.findAllByBookerIdAndEndBefore(
                             userId,
@@ -186,8 +183,8 @@ public class BookingServiceImpl implements BookingService {
                             pageable);
                     break;
                 default:
-                    log.error("Некорректный параметр сортировки: {}", state);
-                    throw new IllegalArgumentException("Unknown state: " + state);
+                    bookings = bookingRepository.findAllByBookerId(userId, pageable);
+                    break;
             }
 
             List<BookingOutputDto> bookingsOutputDto = new ArrayList<>();
@@ -222,9 +219,6 @@ public class BookingServiceImpl implements BookingService {
             Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
 
             switch (state) {
-                case ALL:
-                    bookings = bookingRepository.findAllByItemOwnerId(ownerId, pageable);
-                    break;
                 case PAST:
                     bookings = bookingRepository.findAllByItemOwnerIdAndEndBefore(
                             ownerId,
@@ -256,8 +250,8 @@ public class BookingServiceImpl implements BookingService {
                             pageable);
                     break;
                 default:
-                    log.error("Некорректный параметр сортировки: {}", state);
-                    throw new IllegalArgumentException("Unknown state: " + state);
+                    bookings = bookingRepository.findAllByItemOwnerId(ownerId, pageable);
+                    break;
             }
 
             List<BookingOutputDto> bookingsOutputDto = new ArrayList<>();

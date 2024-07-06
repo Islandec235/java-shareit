@@ -105,12 +105,12 @@ public class ItemRequestServiceTest {
         ItemRequestDto otherRequestDto = new ItemRequestDto(2L, "descTest", otherRequest.getCreated());
 
         when(mockUserRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(mockRequestRepository.findByUserIdNotOrderByCreatedDesc(any())).thenReturn(List.of(otherRequest, request));
+        when(mockRequestRepository.findAllByUserIdNot(any(), any())).thenReturn(List.of(otherRequest, request));
         when(mockItemMapper.listItemDto(any())).thenReturn(List.of(itemDto));
         when(mockRequestMapper.toItemRequestDto(request)).thenReturn(requestDto);
         when(mockRequestMapper.toItemRequestDto(otherRequest)).thenReturn(otherRequestDto);
 
-        List<ItemRequestDto> requests = service.getAllItemRequests(user.getId(), null, null);
+        List<ItemRequestDto> requests = service.getAllItemRequests(user.getId(), 0, 20);
 
         assertEquals(requests, List.of(otherRequestDto, requestDto));
     }
