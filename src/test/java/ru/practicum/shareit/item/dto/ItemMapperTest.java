@@ -1,21 +1,44 @@
 package ru.practicum.shareit.item.dto;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ItemMapperTest {
     private final ItemMapper mapper = new ItemMapper();
-    private Item item = new Item(1L, "Test", "test desc", 0, true);
-    private ItemDto itemDto = new ItemDto(1L, "Test", "test desc", 0, true);
-    private ItemCommentAndBookingDto itemCommentAndBookingDto =
-            new ItemCommentAndBookingDto(1L, "Test", "test desc", 0, true);
+    private Item item;
+    private ItemDto itemDto;
+    private ItemCommentAndBookingDto itemCommentAndBookingDto;
+
+    @BeforeEach
+    void setUp() {
+        item = new Item(1L, "Test", "test desc", 0, true);
+        itemDto = new ItemDto(1L, "Test", "test desc", 0, true);
+        itemCommentAndBookingDto =
+                new ItemCommentAndBookingDto(1L, "Test", "test desc", 0, true);
+    }
 
     @Test
     public void shouldReturnItemDto() {
+        ItemRequest request = new ItemRequest(
+                1L,
+                "desc",
+                LocalDateTime.of(2024, 1, 1, 1, 1, 1));
+        item.setRequest(request);
+        ItemDto toDto = mapper.toItemDto(item);
+        itemDto.setRequestId(1L);
+
+        assertEquals(itemDto, toDto);
+    }
+
+    @Test
+    public void shouldReturnItemDtoWithRequestNull() {
         ItemDto toDto = mapper.toItemDto(item);
 
         assertEquals(itemDto, toDto);

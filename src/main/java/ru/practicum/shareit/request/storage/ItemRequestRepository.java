@@ -9,7 +9,5 @@ import java.util.List;
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
     List<ItemRequest> findByUserId(Long userId);
 
-    List<ItemRequest> findByUserIdNotOrderByCreatedDesc(Long userId);
-
     List<ItemRequest> findAllByUserIdNot(Long userId, Pageable pageable);
 }

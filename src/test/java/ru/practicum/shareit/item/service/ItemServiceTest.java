@@ -124,14 +124,10 @@ public class ItemServiceTest {
 
     @Test
     public void shouldReturnExceptionForCreateWithNotFoundRequest() {
-        Item createdItem = new Item(1L, "Notebook", "testDesc", 0, true);
-        ItemDto createdItemDto = new ItemDto(1L, "Notebook", "testDesc", 0, true);
         itemDto.setRequestId(1L);
 
         when(mockItemMapper.toItem(itemDto)).thenReturn(item);
         when(mockUserRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
-        when(mockItemRepository.save(item)).thenReturn(createdItem);
-        when(mockItemMapper.toItemDto(createdItem)).thenReturn(createdItemDto);
         when(mockItemRequestRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(RequestNotFoundException.class,

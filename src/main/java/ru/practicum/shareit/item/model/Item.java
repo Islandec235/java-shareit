@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.Column;
@@ -47,8 +48,9 @@ public class Item {
     private Booking nextBooking;
     @Transient
     private List<Comment> comments;
-    @Column(name = "request_id")
-    private Long requestId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 
     public Item(Long id, String name, String description, int rentals, Boolean available) {
         this.id = id;
@@ -58,12 +60,12 @@ public class Item {
         this.available = available;
     }
 
-    public Item(Long id, String name, String description, int rentals, Boolean available, Long requestId) {
+    public Item(Long id, String name, String description, int rentals, Boolean available, ItemRequest request) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.rentals = rentals;
         this.available = available;
-        this.requestId = requestId;
+        this.request = request;
     }
 }

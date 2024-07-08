@@ -64,7 +64,6 @@ public class ItemServiceImpl implements ItemService {
         }
 
         item.setOwner(owner.get());
-        ItemDto newItemDto = itemMapper.toItemDto(itemRepository.save(item));
         Long requestId = itemDto.getRequestId();
 
         if (requestId != null) {
@@ -75,12 +74,11 @@ public class ItemServiceImpl implements ItemService {
                 throw new RequestNotFoundException("Не найден запрос с id = " + requestId);
             }
 
-            ItemRequest request = requestOptional.get();
-            List<Item> items = request.getItems();
-            items.add(item);
-            itemRequestRepository.save(request);
-            newItemDto.setRequestId(requestId);
+            item.setRequest(requestOptional.get());
         }
+
+        ItemDto newItemDto = itemMapper.toItemDto(itemRepository.save(item));
+        newItemDto.setRequestId(requestId);
 
         return newItemDto;
     }

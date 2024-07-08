@@ -39,8 +39,7 @@ public class ItemRequest {
     private User user;
     @Column(name = "created")
     private LocalDateTime created;
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "request")
     private List<Item> items = new ArrayList<>();
 
     public ItemRequest(Long id, String description, LocalDateTime created) {

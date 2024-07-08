@@ -51,7 +51,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         for (ItemRequest request : itemRequestList) {
             List<Item> items = request.getItems();
             ItemRequestDto requestDto = requestMapper.toItemRequestDto(request);
-            setItemsRequestId(items, request.getId());
             requestDto.setItems(itemMapper.listItemDto(items));
             itemRequestDtoList.add(requestDto);
         }
@@ -71,7 +70,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         for (ItemRequest request : requests) {
             List<Item> items = request.getItems();
             ItemRequestDto requestDto = requestMapper.toItemRequestDto(request);
-            setItemsRequestId(items, request.getId());
             requestDto.setItems(itemMapper.listItemDto(items));
             itemRequestDtoList.add(requestDto);
         }
@@ -92,7 +90,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         List<Item> items = request.get().getItems();
         ItemRequestDto requestDto = requestMapper.toItemRequestDto(request.get());
-        setItemsRequestId(items, requestDto.getId());
         requestDto.setItems(itemMapper.listItemDto(items));
 
         return requestDto;
@@ -107,11 +104,5 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         }
 
         return user.get();
-    }
-
-    private void setItemsRequestId(List<Item> items, Long requestId) {
-        for (Item item : items) {
-            item.setRequestId(requestId);
-        }
     }
 }
