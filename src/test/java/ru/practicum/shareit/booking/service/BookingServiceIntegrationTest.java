@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
-import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.model.User;
@@ -206,7 +206,7 @@ public class BookingServiceIntegrationTest {
 
     @Test
     public void shouldReturnExceptionForBookingsByOwnerWithoutBookings() {
-        assertThrows(BookingNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.getBookingsByOwner(owner.getId(), "REJECTED", 0, 1));
     }
 

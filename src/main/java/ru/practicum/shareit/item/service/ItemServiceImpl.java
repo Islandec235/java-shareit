@@ -9,21 +9,19 @@ import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemCommentAndBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
-import ru.practicum.shareit.request.exception.RequestNotFoundException;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;
-import ru.practicum.shareit.user.exception.UserConflictException;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -60,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (owner.isEmpty()) {
             log.error("Пользователь с id = {} не найден", ownerId);
-            throw new UserNotFoundException("Не найден владелец с id = " + ownerId);
+            throw new NotFoundException("Не найден владелец с id = " + ownerId);
         }
 
         item.setOwner(owner.get());
@@ -71,7 +69,7 @@ public class ItemServiceImpl implements ItemService {
 
             if (requestOptional.isEmpty()) {
                 log.error("Запрос с id = {} не найден", requestId);
-                throw new RequestNotFoundException("Не найден запрос с id = " + requestId);
+                throw new NotFoundException("Не найден запрос с id = " + requestId);
             }
 
             item.setRequest(requestOptional.get());
@@ -90,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (ownerOptional.isEmpty()) {
             log.error("Пользователь с id = {} не найден", ownerId);
-            throw new UserNotFoundException("Не найден владелец с id = " + ownerId);
+            throw new NotFoundException("Не найден владелец с id = " + ownerId);
         }
 
         User owner = ownerOptional.get();
@@ -98,12 +96,12 @@ public class ItemServiceImpl implements ItemService {
 
         if (itemInStorage.isEmpty()) {
             log.error(String.valueOf(itemDto));
-            throw new ItemNotFoundException("Не найден предмет с id = " + itemDto.getId());
+            throw new NotFoundException("Не найден предмет с id = " + itemDto.getId());
         }
 
         if (!owner.equals(itemInStorage.get().getOwner())) {
             log.error("Пользователь с id = {} не является владельцем предмета = {}", ownerId, itemDto);
-            throw new UserConflictException("Пользователь не владелец предмета");
+            throw new ConflictException("Пользователь не владелец предмета");
         }
 
         Item item;
@@ -132,7 +130,7 @@ public class ItemServiceImpl implements ItemService {
             return itemMapper.toItemDto(itemRepository.save(item));
         } else {
             log.error(String.valueOf(itemDto));
-            throw new ItemNotFoundException("Предмет не найден");
+            throw new NotFoundException("Предмет не найден");
         }
     }
 
@@ -143,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (itemOptional.isEmpty()) {
             log.error(String.valueOf(id));
-            throw new ItemNotFoundException("Не найден предмет с id = " + id);
+            throw new NotFoundException("Не найден предмет с id = " + id);
         }
 
         ItemCommentAndBookingDto itemDto = itemMapper.toItemWithCommentDto(itemOptional.get());

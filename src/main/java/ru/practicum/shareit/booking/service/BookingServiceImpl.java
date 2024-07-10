@@ -10,17 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
-import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -58,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
 
         if (item.isEmpty()) {
             log.error(String.valueOf(bookingInputDto.getItemId()));
-            throw new ItemNotFoundException("Не найден предмет с id = " + bookingInputDto.getItemId());
+            throw new NotFoundException("Не найден предмет с id = " + bookingInputDto.getItemId());
         }
 
         if (!item.get().getAvailable()) {
@@ -68,7 +66,7 @@ public class BookingServiceImpl implements BookingService {
 
         if (item.get().getOwner().getId().equals(userId)) {
             log.error("Пользователь c id = {}, владелец предмета с id = {}", userId, item.get().getId());
-            throw new UserNotFoundException("Не найден пользователь с id = " + userId);
+            throw new NotFoundException("Не найден пользователь с id = " + userId);
         }
 
         booking.setItem(item.get());
@@ -88,14 +86,14 @@ public class BookingServiceImpl implements BookingService {
 
         if (bookingOptional.isEmpty()) {
             log.error("Заказ с id = {} ownerId = {} не найден", bookingId, ownerId);
-            throw new BookingNotFoundException("Не найден заказ с id = " + bookingId);
+            throw new NotFoundException("Не найден заказ с id = " + bookingId);
         }
 
         Booking booking = bookingOptional.get();
 
         if (!booking.getItem().getOwner().getId().equals(ownerId)) {
             log.error("Пользователь с id = {} не является владельцем предмета", ownerId);
-            throw new UserNotFoundException("Не найден пользователь с id = " + ownerId);
+            throw new NotFoundException("Не найден пользователь с id = " + ownerId);
         }
 
         if (booking.getStatus() != BookingStatus.WAITING) {
@@ -122,7 +120,7 @@ public class BookingServiceImpl implements BookingService {
 
         if (booking.isEmpty()) {
             log.error("Заказ с id = {} userId = {} не найден", bookingId, userId);
-            throw new BookingNotFoundException("Не найден заказ с id = " + bookingId);
+            throw new NotFoundException("Не найден заказ с id = " + bookingId);
         }
 
         User user = userValidation(userId);
@@ -132,7 +130,7 @@ public class BookingServiceImpl implements BookingService {
         if (!user.getId().equals(booker.getId())
                 && !user.getId().equals(owner.getId())) {
             log.error("Пользователь с id = {} не владелец и не заказчик", userId);
-            throw new UserNotFoundException("Не найден пользователь с id = " + userId);
+            throw new NotFoundException("Не найден пользователь с id = " + userId);
         }
 
         BookingOutputDto bookingOutputDto = bookingMapper.toBookingOutputDto(booking.get());
@@ -191,7 +189,7 @@ public class BookingServiceImpl implements BookingService {
 
             if (bookings.isEmpty()) {
                 log.error("Заказы с userId = {} и state = {} не найдены", userId, state);
-                throw new BookingNotFoundException("Заказы не найдены");
+                throw new NotFoundException("Заказы не найдены");
             }
 
             for (Booking booking : bookings) {
@@ -258,7 +256,7 @@ public class BookingServiceImpl implements BookingService {
 
             if (bookings.isEmpty()) {
                 log.error("Заказы с userId = {} и state = {} не найдены", ownerId, state);
-                throw new BookingNotFoundException("Заказы не найдены");
+                throw new NotFoundException("Заказы не найдены");
             }
 
             for (Booking booking : bookings) {
@@ -280,7 +278,7 @@ public class BookingServiceImpl implements BookingService {
 
         if (user.isEmpty()) {
             log.error("Пользователь не найден id = {}", userId);
-            throw new UserNotFoundException("Не найден пользователь с id = " + userId);
+            throw new NotFoundException("Не найден пользователь с id = " + userId);
         }
 
         return user.get();

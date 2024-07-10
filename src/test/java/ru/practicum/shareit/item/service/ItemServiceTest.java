@@ -15,21 +15,19 @@ import ru.practicum.shareit.booking.dto.BookingWithBookerIdDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemCommentAndBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
-import ru.practicum.shareit.request.exception.RequestNotFoundException;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;
-import ru.practicum.shareit.user.exception.UserConflictException;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -118,7 +116,7 @@ public class ItemServiceTest {
         when(mockItemMapper.toItem(itemDto)).thenReturn(item);
         when(mockUserRepository.findById(owner.getId())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.create(itemDto, owner.getId()));
     }
 
@@ -130,7 +128,7 @@ public class ItemServiceTest {
         when(mockUserRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
         when(mockItemRequestRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RequestNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.create(itemDto, owner.getId()));
     }
 
@@ -169,16 +167,16 @@ public class ItemServiceTest {
     public void shouldReturnExceptionForUpdateWithEmptyOwner() {
         when(mockUserRepository.findById(owner.getId())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.update(itemDto, owner.getId()));
     }
 
     @Test
-    public void shouldReturnItemNotFoundExceptionForUpdate() {
+    public void shouldReturnNotFoundExceptionForUpdate() {
         when(mockUserRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
         when(mockItemRepository.findById(itemDto.getId())).thenReturn(Optional.empty());
 
-        assertThrows(ItemNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.update(itemDto, owner.getId()));
     }
 
@@ -191,7 +189,7 @@ public class ItemServiceTest {
         when(mockUserRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(mockItemRepository.findById(itemDto.getId())).thenReturn(Optional.of(itemInDb));
 
-        assertThrows(UserConflictException.class,
+        assertThrows(ConflictException.class,
                 () -> service.update(itemDto, user.getId()));
     }
 
@@ -275,7 +273,7 @@ public class ItemServiceTest {
         when(mockUserRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
         when(mockItemRepository.findById(itemDto.getId())).thenReturn(Optional.of(itemInDb));
 
-        assertThrows(ItemNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.update(itemDto, owner.getId()));
     }
 
@@ -307,7 +305,7 @@ public class ItemServiceTest {
     public void shouldReturnExceptionForItemByIdWithoutItem() {
         when(mockItemRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ItemNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.getItemById(1L, 1L));
     }
 

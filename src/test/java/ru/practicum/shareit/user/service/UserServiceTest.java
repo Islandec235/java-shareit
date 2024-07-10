@@ -9,10 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.exception.UserConflictException;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -74,7 +74,7 @@ public class UserServiceTest {
         when(mockMapper.toUser(userDto)).thenReturn(user);
         when(mockRepository.findByEmail(user.getEmail())).thenReturn(otherUser);
 
-        assertThrows(UserConflictException.class,
+        assertThrows(ConflictException.class,
                 () -> userService.create(userDto));
     }
 
@@ -110,7 +110,7 @@ public class UserServiceTest {
         when(mockRepository.findById(1L)).thenReturn(Optional.of(userDb));
         when(mockRepository.findByEmail(user.getEmail())).thenReturn(userByEmail);
 
-        assertThrows(UserConflictException.class,
+        assertThrows(ConflictException.class,
                 () -> userService.update(userDto));
     }
 
@@ -156,7 +156,7 @@ public class UserServiceTest {
     public void shouldNotFoundUserById() {
         when(mockRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> userService.getUserById(1L));
     }
 }

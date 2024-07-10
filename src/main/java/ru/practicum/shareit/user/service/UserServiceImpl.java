@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.exception.UserConflictException;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
         if (repository.findByEmail(user.getEmail()) != null) {
             log.error("Дубликат email = {}", user.getEmail());
-            throw new UserConflictException("Пользователь уже существует");
+            throw new ConflictException("Пользователь уже существует");
         }
 
         return mapper.toUserDto(repository.save(user));
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
         if (userByEmail != null && !userByEmail.equals(userInStorage)) {
             log.error(String.valueOf(userDto));
-            throw new UserConflictException("Еmail пользователя не совпадает с id");
+            throw new ConflictException("Еmail пользователя не совпадает с id");
         }
 
         if (userDto.getName() != null && userDto.getEmail() != null) {
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
         if (user.isEmpty()) {
             log.error(String.valueOf(id));
-            throw new UserNotFoundException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
 
         return mapper.toUserDto(user.get());

@@ -1,12 +1,17 @@
 package ru.practicum.shareit.request.dto;
 
-import lombok.NonNull;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.request.model.ItemRequest;
 
+import java.time.LocalDateTime;
+
 @Component
 public class ItemRequestMapper {
-    public ItemRequestDto toItemRequestDto(@NonNull ItemRequest itemRequest) {
+    public ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
+        if (itemRequest == null) {
+            return null;
+        }
+
         return new ItemRequestDto(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
@@ -14,11 +19,15 @@ public class ItemRequestMapper {
         );
     }
 
-    public ItemRequest toItemRequest(@NonNull ItemRequestDto itemRequestDto) {
+    public ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
+        if (itemRequestDto == null) {
+            return null;
+        }
+
         return new ItemRequest(
                 itemRequestDto.getId(),
                 itemRequestDto.getDescription(),
-                itemRequestDto.getCreated()
+                LocalDateTime.now()
         );
     }
 }

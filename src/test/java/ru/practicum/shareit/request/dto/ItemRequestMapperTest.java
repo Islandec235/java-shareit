@@ -32,6 +32,7 @@ public class ItemRequestMapperTest {
     @Test
     public void shouldReturnItemRequest() {
         ItemRequest toEntity = mapper.toItemRequest(itemRequestDto);
+        toEntity.setCreated(itemRequestDto.getCreated());
 
         assertEquals(toEntity, itemRequest);
     }

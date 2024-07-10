@@ -9,16 +9,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
-import ru.practicum.shareit.request.exception.RequestNotFoundException;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -81,7 +80,7 @@ public class ItemRequestServiceTest {
     public void shouldReturnExceptionForCreateRequest() {
         when(mockUserRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.create(user.getId(), requestDto));
     }
 
@@ -120,7 +119,7 @@ public class ItemRequestServiceTest {
         when(mockUserRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(mockRequestRepository.findById(request.getId())).thenReturn(Optional.empty());
 
-        assertThrows(RequestNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.getItemRequestById(user.getId(), request.getId()));
     }
 }

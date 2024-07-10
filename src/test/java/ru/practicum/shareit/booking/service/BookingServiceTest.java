@@ -12,18 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
-import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -144,7 +142,7 @@ public class BookingServiceTest {
 
         when(mockUserRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.create(inputBooking, user.getId()));
     }
 
@@ -160,7 +158,7 @@ public class BookingServiceTest {
         when(mockBookingMapper.toBooking(inputBooking)).thenReturn(booking);
         when(mockItemRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(ItemNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.create(inputBooking, user.getId()));
     }
 
@@ -194,7 +192,7 @@ public class BookingServiceTest {
         when(mockBookingMapper.toBooking(inputBooking)).thenReturn(booking);
         when(mockItemRepository.findById(any())).thenReturn(Optional.of(item));
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.create(inputBooking, user.getId()));
     }
 
@@ -244,7 +242,7 @@ public class BookingServiceTest {
         when(mockUserRepository.findById(any())).thenReturn(Optional.of(owner));
         when(mockBookingRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(BookingNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.confirmBooking(1L, 1L, true));
     }
 
@@ -256,7 +254,7 @@ public class BookingServiceTest {
         when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
         when(mockBookingRepository.findById(any())).thenReturn(Optional.of(booking));
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.confirmBooking(2L, 1L, true));
     }
 
@@ -316,7 +314,7 @@ public class BookingServiceTest {
     public void shouldReturnNotFoundForGetByIdWithoutBooking() {
         when(mockBookingRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(BookingNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.getBookingById(user.getId(), booking.getId()));
     }
 
@@ -329,7 +327,7 @@ public class BookingServiceTest {
         when(mockBookingRepository.findById(any())).thenReturn(Optional.of(booking));
         when(mockUserRepository.findById(any())).thenReturn(Optional.of(otherUser));
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.getBookingById(otherUser.getId(), booking.getId()));
     }
 
@@ -453,7 +451,7 @@ public class BookingServiceTest {
         when(mockUserRepository.findById(any())).thenReturn(Optional.of(user));
         when(mockBookingRepository.findAllByBookerId(any(), any())).thenReturn(Collections.emptyList());
 
-        assertThrows(BookingNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> service.getBookingsByUser(user.getId(), "ALL", 0, 20));
     }
 

@@ -149,6 +149,7 @@
 							<exclude>ru/practicum/shareit/ShareItApp.*</exclude>
 							<exclude>ru/practicum/shareit/**/dto/</exclude>
 							<exclude>ru/practicum/shareit/error/</exclude>
+							<exclude>ru/practicum/shareit/exception/</exclude>
 							<exclude>ru/practicum/shareit/*Controller.*</exclude>
 						</excludes>
 					</configuration>
