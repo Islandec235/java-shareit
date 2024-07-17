@@ -12,7 +12,8 @@ public class CommentMapper {
         return new CommentDto(
                 comment.getId(),
                 comment.getText(),
-                comment.getAuthorName()
+                comment.getAuthorName(),
+                comment.getCreated()
         );
     }
 
@@ -33,15 +34,4 @@ public class CommentMapper {
 
         return commentsDto;
     }
-
-    public List<Comment> listComment(List<CommentDto> commentsDto) {
-        List<Comment> comments = new ArrayList<>();
-
-        for (CommentDto commentDto : commentsDto) {
-            comments.add(toComment(commentDto));
-        }
-
-        return comments;
-    }
-
 }

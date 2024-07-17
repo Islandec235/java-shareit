@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.2</version>
+		<version>2.7.18</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -125,7 +125,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.7.0.0</version>
+					<version>4.8.5.0</version>
 					<configuration>
 						<effort>Max</effort>
 						<threshold>High</threshold>
@@ -141,9 +141,17 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.8</version>
+					<version>0.8.11</version>
 					<configuration>
 						<output>file</output>
+						<excludes>
+							<exclude>ru/practicum/shareit/**/model/</exclude>
+							<exclude>ru/practicum/shareit/ShareItApp.*</exclude>
+							<exclude>ru/practicum/shareit/**/dto/</exclude>
+							<exclude>ru/practicum/shareit/error/</exclude>
+							<exclude>ru/practicum/shareit/exception/</exclude>
+							<exclude>ru/practicum/shareit/*Controller.*</exclude>
+						</excludes>
 					</configuration>
 					<executions>
 						<execution>

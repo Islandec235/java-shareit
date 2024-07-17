@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,8 @@ import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 /**
@@ -23,6 +26,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
+@Validated
 public class BookingController {
     private final BookingService service;
 
@@ -45,14 +49,20 @@ public class BookingController {
     }
 
     @GetMapping
-    public Collection<BookingOutputDto> getBookingsByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                          @RequestParam(defaultValue = "ALL") String state) {
-        return service.getBookingsByUser(userId, state);
+    public Collection<BookingOutputDto> getBookingsByUser(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(required = false, defaultValue = "20") @Positive Integer size) {
+        return service.getBookingsByUser(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public Collection<BookingOutputDto> getBookingsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                           @RequestParam(defaultValue = "ALL") String state) {
-        return service.getBookingsByOwner(userId, state);
+    public Collection<BookingOutputDto> getBookingsByOwner(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(required = false, defaultValue = "20") @Positive Integer size) {
+        return service.getBookingsByOwner(userId, state, from, size);
     }
 }

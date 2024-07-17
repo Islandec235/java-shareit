@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,9 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.time.Instant;
 import java.util.Collection;
 
 /**
@@ -24,6 +28,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Validated
 public class ItemController {
     private final ItemService itemService;
 
@@ -48,18 +53,25 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemCommentAndBookingDto> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        return itemService.getItemsByOwner(ownerId);
+    public Collection<ItemCommentAndBookingDto> getItemsByOwner(
+            @RequestHeader("X-Sharer-User-Id") Long ownerId,
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(required = false, defaultValue = "20") @Positive Integer size) {
+        return itemService.getItemsByOwner(ownerId, from, size);
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> search(@RequestParam String text) {
-        return itemService.search(text);
+    public Collection<ItemDto> search(
+            @RequestParam String text,
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(required = false, defaultValue = "20") @Positive Integer size) {
+        return itemService.search(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
                                     @PathVariable Long itemId, @Valid @RequestBody CommentDto commentDto) {
+        commentDto.setCreated(Instant.now());
         return itemService.createComment(userId, itemId, commentDto);
     }
 }
