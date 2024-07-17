@@ -52,7 +52,6 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-
     <profiles>
         <profile>
             <id>check</id>
