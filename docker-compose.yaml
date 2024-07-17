@@ -1,0 +1,32 @@
+version: '26.1.4'
+services:
+  gateway:
+    build: gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - server
+    environment:
+      - TZ=Europe/Moscow
+      - SPRING_SERVER_URL=http://server:9090
+  server:
+    build: server
+    ports:
+      - "9090:9090"
+    depends_on:
+      - db
+    environment:
+      - TZ=Europe/Moscow
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
+  db:
+    image: postgres:latest
+    ports:
+      - "2345:5432"
+    volumes:
+      - /var/lib/postresql/data/
+    environment:
+      - TZ=Europe/Moscow
+      - POSTGRES_DB=shareit
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=12345
